@@ -1,0 +1,40 @@
+---
+# Provisions EC2
+
+- name: Create security group
+  ignore_errors: yes
+  local_action:
+    module: ec2_group
+    region: ${region}
+    name: ${security_group}
+    description: a group for Dokku through Ansible
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0
+
+- name: Launch instance
+  local_action: ec2 keypair={{keypair_name}} group={{security_group}} instance_type={{instance_type}} image={{image}} region={{region}} wait=true count=1
+  register: ec2
+
+- name: Add new instances to host group
+  local_action: add_host hostname={{item.public_ip}} groupname=ec2hosts
+  with_items: ${ec2.instances}
+
+- name: Tag the new instances
+  local_action: ec2_tag resource={{item.id}} region={{region}} state=present
+  with_items: ${ec2.instances}
+  args:
+    tags:
+      Name: ${instance_name}
+
+- name: Wait for the instances to boot by checking the ssh port
+  local_action: wait_for host={{item.public_dns_name}} port=22 delay=20 timeout=320 state=started
+  with_items: ${ec2.instances}
+
+

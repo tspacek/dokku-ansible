@@ -1,0 +1,36 @@
+# This playbook provisions and configures a Dokku server.
+# You need ansible 1.3+
+#
+# First set up these environment variables:
+# export AWS_ACCESS_KEY_ID=5678
+# export AWS_SECRET_ACCESS_KEY=9101112
+# export ANSIBLE_HOST_KEY_CHECKING=False
+# And make sure you have your AWS keypair created and key saved.
+#
+# Then run:
+# ansible-playbook install_dokku.yml -v -i ./hosts --private-key=~/.ssh/DokkuSydney.pem
+
+- name: Provision EC2
+  hosts: local
+  connection: local
+  user: root
+
+  roles:
+    - ec2
+
+- name: Install and Configure Dokku
+  hosts: ec2hosts
+  user: ubuntu
+  gather_facts: false
+
+  roles:
+    - dokku
+
+- name: Add key to Dokku
+  hosts: ec2hosts
+  connection: local
+  user: root
+  gather_facts: false
+
+  roles:
+    - dokku_key

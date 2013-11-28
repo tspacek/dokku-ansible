@@ -1,0 +1,26 @@
+---
+# Install Dokku
+
+# # For speed the AMI has these steps done already.
+# - name: Update dependencies
+#   command: "sudo apt-get update"
+
+# - name: Install Dokku
+#   shell: "wget -qO - https://raw.github.com/progrium/dokku/v0.2.0/bootstrap.sh | sudo DOKKU_TAG=v0.2.0 bash"
+#   sudo: true
+#   async: 1200
+
+- name: Add VHOST file
+  shell: echo {{domain}} > /home/dokku/VHOST
+  sudo: true
+
+- name: Download Postgres plugin
+  command: chdir=/var/lib/dokku/plugins sudo git clone https://github.com/Kloadut/dokku-pg-plugin postgresql
+
+- name: Install Postgres plugin
+  command: sudo dokku plugins-install
+  async: 1200
+
+- name: Create Postgres database for the app
+  command: sudo dokku postgresql:create {{app_name}}
+  ignore_errors: yes

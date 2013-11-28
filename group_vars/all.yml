@@ -1,0 +1,10 @@
+keypair_name: DokkuDemo
+keypair_key: ./DokkuDemo.pem
+instance_type: m1.small
+security_group: dokku-demo
+# image: ami-ebcf50d1 # Ubuntu 13.04
+image: ami-0bf86731 # Ubuntu 13.04 with Dokku installed already.
+region: ap-southeast-2
+instance_name: Ansible Dokku Demo
+app_name: donald
+domain: demo.tomspacek.com
